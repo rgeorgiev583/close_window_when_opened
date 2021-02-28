@@ -2,6 +2,7 @@
 #include <libwnck/libwnck.h>
 
 static GMainLoop* main_loop;
+static int window_open_count = 1, current_window_open_count = 0;
 
 static void on_window_opened(WnckScreen* screen, WnckWindow* window, gpointer data)
 {
@@ -9,7 +10,9 @@ static void on_window_opened(WnckScreen* screen, WnckWindow* window, gpointer da
 
     if (!strcmp(wnck_window_get_name(window), window_title)) {
         wnck_window_close(window, 0);
-        g_main_loop_quit(main_loop);
+        current_window_open_count++;
+        if (current_window_open_count == window_open_count)
+            g_main_loop_quit(main_loop);
     }
 }
 
@@ -19,6 +22,10 @@ int main(int argc, char** argv)
         exit(EXIT_FAILURE);
 
     char* window_title = argv[1];
+    if (argc >= 3)
+        window_open_count = atoi(argv[2]);
+    if (window_open_count <= 0)
+        exit(EXIT_FAILURE);
 
     gdk_init(&argc, &argv);
 
