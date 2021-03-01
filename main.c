@@ -1,14 +1,17 @@
 #define WNCK_I_KNOW_THIS_IS_UNSTABLE 1
 #include <libwnck/libwnck.h>
+#include <stdbool.h>
 
 static char* window_title;
 static int window_open_count = 1, current_window_open_count = 0;
+static bool allow_inexact_matching_of_window_title = false;
 
 static GMainLoop* main_loop;
 
 static void on_window_opened(WnckScreen* screen, WnckWindow* window, gpointer data)
 {
-    if (!strcmp(wnck_window_get_name(window), window_title)) {
+    const char* current_window_title = wnck_window_get_name(window);
+    if (allow_inexact_matching_of_window_title && strstr(window_title, current_window_title) || !strcmp(window_title, current_window_title)) {
         wnck_window_close(window, 0);
         current_window_open_count++;
         if (current_window_open_count == window_open_count)
@@ -22,10 +25,14 @@ int main(int argc, char** argv)
         exit(EXIT_FAILURE);
 
     char opt;
-    while ((opt = getopt(argc, argv, "c:")) != -1) {
+    while ((opt = getopt(argc, argv, "c:i")) != -1) {
         switch (opt) {
         case 'c':
             window_open_count = atoi(optarg);
+            break;
+
+        case 'i':
+            allow_inexact_matching_of_window_title = true;
             break;
         }
     }
