@@ -21,11 +21,19 @@ int main(int argc, char** argv)
     if (argc < 2)
         exit(EXIT_FAILURE);
 
-    window_title = argv[1];
-    if (argc >= 3)
-        window_open_count = atoi(argv[2]);
-    if (window_open_count <= 0)
+    char opt;
+    while ((opt = getopt(argc, argv, "c:")) != -1) {
+        switch (opt) {
+        case 'c':
+            window_open_count = atoi(optarg);
+            break;
+        }
+    }
+
+    if (optind >= argc || window_open_count <= 0)
         exit(EXIT_FAILURE);
+
+    window_title = argv[optind];
 
     gdk_init(&argc, &argv);
 
